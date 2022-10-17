@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 function App() {
     const [products, setProducts] = useState([]);
     const [cart, setCart] = useState([]);
+    const [checkedState, setCheckedState] = useState([]);
 
     // from https://stackoverflow.com/questions/24038971/add-00-tofixed-only-if-number-has-less-than-two-decimal-places
     function addZeroes(num) {
@@ -25,6 +26,11 @@ function App() {
         getProducts();
     }, []);
 
+    const handleOnChange = (position) => {
+        const updatedCheckedState = checkedState.map((state, index) => (index === position ? !state : state));
+        setCheckedState(updatedCheckedState);
+    };
+
     const handleAddCart = (product) => {
         // cart = [{item:{product { item: something}},quantity:1}, ....]
         let isInCart = cart.some((cartItem) => cartItem.item.title === product.title);
@@ -40,6 +46,29 @@ function App() {
         setCart(newCart);
     };
 
+    const handleRemove = () => {
+        // array of cart index to remove
+        const productsToRemove = checkedState.reduce((value, bool, index) => (bool ? value.concat(index) : value), []);
+        // let productsToRemove = [];
+        // for (const [index, value] of checkedState.entries()) {
+        //     if (value) {
+        //         productsToRemove.push(index);
+        //     }
+        // }
+        let newCart = [...cart];
+        // reverse order to not mess up the specific index of values yet to be deleted
+        for (let i = productsToRemove.length - 1; i >= 0; i--) {
+            newCart.splice(productsToRemove[i], 1);
+        }
+
+        setCart(newCart);
+    };
+
+    useEffect(() => {
+        const newCheckedState = new Array(cart.length).fill(false);
+        setCheckedState(newCheckedState);
+    }, [cart]);
+
     return (
         <div className="wrapper">
             <header>
@@ -49,9 +78,9 @@ function App() {
                 <section className="gallerySection">
                     <h2>All Products</h2>
                     <ul className="productCollection">
-                        {products.map((product) => {
+                        {products.map((product, index) => {
                             return (
-                                <li className="product" key={product.id}>
+                                <li className="product" key={`${product.id}${index}`}>
                                     <div className="productImg">
                                         {<img src={product.image} alt={product.description} />}
                                     </div>
@@ -66,9 +95,19 @@ function App() {
                 <section className="cartSection">
                     <h2>Shopping Cart</h2>
                     <ul className="cartList">
-                        {cart.map((cartItem) => {
+                        {cart.map((cartItem, index) => {
                             return (
-                                <li className="cartItem" key={cartItem.id}>
+                                <li className="cartItem" key={`${cartItem.item.id}${index}`}>
+                                    <input
+                                        type="checkbox"
+                                        id={`selectCheckbox${index}`}
+                                        className="selectCheckBox"
+                                        onChange={() => handleOnChange(index)}
+                                        name={cartItem.item.title}
+                                        value={cartItem.item.title}
+                                        checked={checkedState[index] || ''}
+                                    />
+                                    <label htmlFor={`selectCheckbox${index}`}></label>
                                     <div className="cartItemImg">
                                         {<img src={cartItem.item.image} alt={cartItem.item.description} />}
                                     </div>
@@ -79,6 +118,9 @@ function App() {
                             );
                         })}
                     </ul>
+                    <button className="deleteBtn" onClick={() => handleRemove()}>
+                        Remove from Cart
+                    </button>
                     <button className="checkoutBtn">Check Out</button>
                 </section>
             </main>
