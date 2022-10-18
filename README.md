@@ -1,70 +1,122 @@
-# Getting Started with Create React App
+# Objective
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Mini shopping cart app to review common array methods & handling multiple checkbox states.
 
-## Available Scripts
+## Common array methods
 
-In the project directory, you can run:
+### .map
 
-### `npm start`
+`map()` returns a new array with the result of calling a given function on every element of the original array that map is called on. The original array is not modified.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+#### Example
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Using `map()` to update an array of checked states to track which items in cart are checked at all times by matching `index` of the item with the position in the state array (to update checked item to `true`):
 
-### `npm test`
+```
+const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((state, index) => (index === position ? !state : state));
+    setCheckedState(updatedCheckedState);
+};
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### .some
 
-### `npm run build`
+`some()` returns `true` or `false`. `true` if at least one element in the array passes the condition provided, `false `if otherwise. The original array is not modified.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### Example
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Using `some()` to check if a given item already exists in the cart, if `true`, update the quantity, if `false`, add the whole item to the cart
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+let isInCart = cart.some((cartItem) => cartItem.item.title === product.title);
+```
 
-### `npm run eject`
+### .find
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+`find()` is similar to `some()` in the sense that they both test for a specific condition/function provided but `find()` returns the FIRST element found that satifies it or `undefined` if nothing satisfies it. The original array is not modified.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### Example
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+`find()` is used to get the item name that has been added to cart and match it to the current item in cart to increment quantity for that specific cart item `object`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+if (isInCart) {
+    // if exists in cart, increment quantity by 1
+    newCart.find((cartItem) => cartItem.item.title === product.title).quantity++;
+} else {
+    newCart = [...cart, { item: product, quantity: 1 }];
+}
+```
 
-## Learn More
+### .reduce
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+`reduce()` applies a reducer function on all the elements of the array. It's often used to find the sum/total of all elements. It returns the value resulting from the reducer function. The original array is not modified.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The first time that the callback is run there is no "return value of the previous calculation". If supplied, an initial value can be used otherwise the array element at index 0 is used.
 
-### Code Splitting
+#### Example
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+To populate a new array with checked items to remove from cart (checked items would have a true value):
 
-### Analyzing the Bundle Size
+```
+const productsToRemove = checkedState.reduce((value, bool, index) => (bool ? value.concat(index) : value), []);
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+which is equivalent to doing:
 
-### Making a Progressive Web App
+```
+let productsToRemove = [];
+for (const [index, bool] of checkedState.entries()) {
+    if (bool) {
+        productsToRemove.push(index);
+    }
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+To calculate the total in the cart (price \* quantity):
 
-### Advanced Configuration
+```
+const calculateTotal = () => {
+    const newTotal = cart.reduce((partialSum, a) => partialSum + a.item.price * a.quantity, 0);
+    setTotal(newTotal);
+};
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Handling multiple checkbox states
 
-### Deployment
+### 1. Inititalize a state to track each checkbox
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```
+const [checkedState, setCheckedState] = useState([]); // [true,true,false,false,false] where true is checked
+```
 
-### `npm run build` fails to minify
+If the length of the checkboxes is fixed and known, then:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+const [checkedState, setCheckedState] = useState(
+  new Array(listOfCheckboxes.length).fill(false)
+);
+```
+
+### 2. Control input box (managed by state)
+
+Controlled input box should only be change by managing the state. The `|| ''` in `checked=` is to bypass the warning that the element is first undefined and then set to false after being added to cart.
+
+```
+<input
+    type="checkbox"
+    id={`selectCheckbox${index}`}
+    className="selectCheckBox"
+    onChange={() => handleOnChange(index)}
+    name={cartItem.item.title}
+    value={cartItem.item.title}
+    checked={checkedState[index] || ''}
+/>
+<label htmlFor={`selectCheckbox${index}`}></label>
+```
+
+### 3. Track checked state with `onChange`
+
+The state array for whether an element is checked is updated to `true` or `false` thanks to its index and `onChange`.
+
+Additional resource: https://www.freecodecamp.org/news/how-to-work-with-multiple-checkboxes-in-react/
