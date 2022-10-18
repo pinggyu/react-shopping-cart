@@ -112,3 +112,7 @@ header {
     background-color: rgb(240, 132, 132);
     color: white;
 }
+
+.totalPrice {
+    font-weight: 600;
+}

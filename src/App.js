@@ -7,6 +7,7 @@ function App() {
     const [products, setProducts] = useState([]);
     const [cart, setCart] = useState([]);
     const [checkedState, setCheckedState] = useState([]);
+    const [total, setTotal] = useState(0);
 
     // from https://stackoverflow.com/questions/24038971/add-00-tofixed-only-if-number-has-less-than-two-decimal-places
     function addZeroes(num) {
@@ -69,6 +70,15 @@ function App() {
         setCheckedState(newCheckedState);
     }, [cart]);
 
+    useEffect(() => {
+        const calculateTotal = () => {
+            const newTotal = cart.reduce((partialSum, a) => partialSum + a.item.price * a.quantity, 0);
+            setTotal(newTotal);
+        };
+
+        calculateTotal();
+    }, [cart]);
+
     return (
         <div className="wrapper">
             <header>
@@ -118,6 +128,7 @@ function App() {
                             );
                         })}
                     </ul>
+                    <div className="totalPrice">{`Cart total: $${addZeroes(total)}`}</div>
                     <button className="deleteBtn" onClick={() => handleRemove()}>
                         Remove from Cart
                     </button>
