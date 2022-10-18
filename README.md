@@ -33,11 +33,11 @@ let isInCart = cart.some((cartItem) => cartItem.item.title === product.title);
 
 ### .find
 
-`find()` is similar to `some()` in the sense that they both test for a specific condition/function provided but `find()` returns the FIRST element found that satifies it or `undefined` if nothing satisfies it. The original array is not modified.
+`find()` is similar to `some()` in the sense that they both test for a specific condition/function provided but `find()` returns the FIRST element found that satisfies it or `undefined` if nothing satisfies it. The original array is not modified.
 
 #### Example
 
-`find()` is used to get the item name that has been added to cart and match it to the current item in cart to increment quantity for that specific cart item `object`.
+`find()` is used to get the item name that has been added to cart and match it to the current item in cart to increment quantity for that specific cart item object.
 
 ```
 if (isInCart) {
@@ -84,7 +84,7 @@ const calculateTotal = () => {
 
 ## Handling multiple checkbox states
 
-### 1. Inititalize a state to track each checkbox
+### 1. Initialize a state to track each checkbox
 
 ```
 const [checkedState, setCheckedState] = useState([]); // [true,true,false,false,false] where true is checked
@@ -100,7 +100,7 @@ const [checkedState, setCheckedState] = useState(
 
 ### 2. Control input box (managed by state)
 
-Controlled input box should only be change by managing the state. The `|| ''` in `checked=` is to bypass the warning that the element is first undefined and then set to false after being added to cart.
+Controlled input box should only be changed by managing the state. The `|| ''` in `checked=` is to bypass the warning that the element is first undefined and then set to false after being added to cart.
 
 ```
 <input
